@@ -35,7 +35,7 @@
     "CloudFront",
     "aws",
     "redirect",
-    "ssl",
+    "ssl"
   ],
   "dependencies": {
     "aws-sdk": "2.264.1",
