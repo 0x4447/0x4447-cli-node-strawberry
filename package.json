@@ -33,7 +33,9 @@
     "nodejs",
     "s3",
     "CloudFront",
-    "aws"
+    "aws",
+    "redirect",
+    "ssl",
   ],
   "dependencies": {
     "aws-sdk": "2.264.1",
