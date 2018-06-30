@@ -1,8 +1,12 @@
 # 🍓 Strawberry
 
-This CLI will help you automatically create a HTTPS redirect from one domain to another. This seemingly simple task is actually quite complex when you want to have a domain be redirected over a encrypted connection. THe problem is that you need to create a new SLL certificate for the domain that you want to redirect from, and have it some how be accessible by the public. One solution would be to just have a server that would do that made with your favorite programming language, but that seams to be an overkill for such basic task.
+This CLI will automatically create a HTTPS redirect from one domain to another. This seemingly simple task is actually quite complex when you want to have a domain be redirected over a encrypted connection.
 
-ANother solution would be to go serverless and take advantage of what AWS has to offer so you don't have to manage a server for a simple redirect.
+The problem is that you need to create a new SLL certificate for the domain that you want to redirect from, and have it some how be accessible by the public. One solution would be to just have a regular server to do the redirect, but that seams to be an overkill for a such small task.
+
+Another solution would be to go serverless, and take advantage of what AWS has to offer so you don't have to manage a server for a simple redirect.
+
+This is where 🍓 Strawberry will help you create the whole stack automatically for you. You just provide some basic information, and the rest is up to the CLI.
 
 # How to Install
 
@@ -24,7 +28,7 @@ ANother solution would be to go serverless and take advantage of what AWS has to
 
 # What to Expect
 
-This CLI will:
+### This CLI will
 
 - Create a S3 bucket with redirect enabled to the destination domain.
 - Create a certificate for the source domain.
@@ -33,7 +37,7 @@ This CLI will:
 
 **WARNING**: What if the certificate takes too long to validate? After 60 seconds, the app will quit and print out a detailed explanation of what your next steps are. Take the time to thoroughly go over the printout, and you'll be good.
 
-This way the high level flow looks like this:
+### High level flow looks like this
 
 - You visit the source domain.
 - CloudFront reads the S3 bucket configuration.
