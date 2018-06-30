@@ -170,6 +170,30 @@ display_the_welcome_message(container)
 
 	}).then(function(container) {
 
+		return create_a_distribution(container)
+
+	}).then(function(container) {
+
+		return get_all_domain_records(container);
+
+	}).then(function(container) {
+
+		return look_for_domain_entry(container);
+
+	}).then(function(container) {
+
+		return delete_domain_entry(container);
+
+	}).then(function(container) {
+
+		return create_a_route_53_record(container)
+
+	}).then(function(container) {
+
+		return print_domain_configuration(container)
+
+	}).then(function(container) {
+
 		term("\n\n");
 		term("\tDone!");
 		term("\n\n");
@@ -577,7 +601,7 @@ function create_s3_bucket(container)
 			//		request to the main domain and not straight to the
 			//		S3 Bucket prior to the domain propagation
 			//
-			container.bucket_url_path = container.destination
+			container.bucket_url_path = container.source
 									  + '.s3-website-'
 									  + container.region
 									  + '.amazonaws.com';
@@ -671,7 +695,7 @@ function make_s3_bucket_public(container)
 		//	1.	Set the parameters to change the Bucket policy
 		//
 		let params = {
-			Bucket: container.destination,
+			Bucket: container.source,
 			Policy: JSON.stringify({
 				Version: '2012-10-17',
 				Statement: [
@@ -805,7 +829,7 @@ function look_for_domain_certificate(container)
 			//
 			//	1.	Look for a match
 			//
-			if(container.certificates[key].DomainName == container.bucket)
+			if(container.certificates[key].DomainName == container.source)
 			{
 				//
 				//	1.	Save the ARN once it is found
@@ -1403,6 +1427,446 @@ function check_certificate_validity(container)
 			});
 
 		}
+
+	});
+}
+
+//
+//	Now that we have everything, we can finally use all this data and
+//	create a CloudFront Distribution
+//
+function create_a_distribution(container)
+{
+	return new Promise(function(resolve, reject) {
+
+		term.clear();
+
+		term("\n");
+
+		term.yellow("\tCreating a CloudFront Distribution...");
+
+		//
+		//	1.	All the setting necessary to create a CF Distribution
+		//
+		let params = {
+			DistributionConfigWithTags: {
+				DistributionConfig: {
+					CallerReference: new Date().toString(),
+					Comment: '-',
+					DefaultCacheBehavior: {
+						ForwardedValues: {
+							Cookies: {
+								Forward: 'none'
+							},
+							QueryString: false,
+							Headers: {
+								Quantity: 0
+							},
+							QueryStringCacheKeys: {
+								Quantity: 0
+							}
+						},
+						MinTTL: 0,
+						TargetOriginId: container.bucket_url_path,
+						TrustedSigners: {
+							Enabled: false,
+							Quantity: 0
+						},
+						ViewerProtocolPolicy: 'redirect-to-https',
+						AllowedMethods: {
+							Items: ['GET', 'HEAD'],
+							Quantity: 2,
+							CachedMethods: {
+								Items: ['GET', 'HEAD'],
+								Quantity: 2
+							}
+						},
+						Compress: true,
+						DefaultTTL: 86400,
+						LambdaFunctionAssociations: {
+							Quantity: 0,
+						},
+						MaxTTL: 31536000,
+						SmoothStreaming: false
+					},
+					Enabled: true,
+					Origins: {
+						Quantity: 1,
+						Items: [{
+							DomainName: container.bucket_url_path,
+							Id: container.bucket_url_path,
+							CustomOriginConfig: {
+								HTTPPort: 80,
+								HTTPSPort: 443,
+								OriginProtocolPolicy: 'http-only',
+								OriginSslProtocols: {
+									Quantity: 1,
+									Items: ['TLSv1.1']
+								}
+							}
+						}]
+					},
+					Aliases: {
+						Quantity: 1,
+						Items: [container.source]
+					},
+					CacheBehaviors: {
+						Quantity: 0
+					},
+					CustomErrorResponses: {
+						Quantity: 0
+					},
+					DefaultRootObject: 'home',
+					HttpVersion: 'http2',
+					IsIPV6Enabled: true,
+					PriceClass: 'PriceClass_100',
+					Restrictions: {
+						GeoRestriction: {
+							Quantity: 0,
+							RestrictionType: 'none'
+						}
+					},
+					ViewerCertificate: {
+						ACMCertificateArn: container.cert_arn,
+						CloudFrontDefaultCertificate: false,
+						MinimumProtocolVersion: 'TLSv1.1_2016',
+						SSLSupportMethod: 'sni-only'
+					}
+				},
+				Tags: {
+					Items: [
+						{ Key: 'type', Value: 'redirect' }
+					]
+				}
+			}
+		};
+
+		//
+		//	2.	Create the distribution
+		//
+		container.cloudfront.createDistributionWithTags(params, function(error, data) {
+
+			//
+			//	1.	Check if there was an error
+			//
+			if(error)
+			{
+				return reject(error);
+			}
+
+			//
+			//	2.	Save the unique domain name of CloudFront which will
+			//		be used to create a DNS record so the domain will
+			//		point in the right place
+			//
+			container.cloudfront_domain_name = data.Distribution.DomainName
+
+			//
+			//	-> Move to the next chain
+			//
+			return resolve(container);
+
+		});
+
+	});
+}
+
+//
+//	Get all the DNS settings for a specific domain so we can see if what
+//	we want to set can be set.
+//
+function get_all_domain_records(container)
+{
+	return new Promise(function(resolve, reject) {
+
+		term.clear();
+
+		term("\n");
+
+		term.yellow("\tGetting all the Domain Records...");
+
+		//
+		//	1.	Specify the Domain that we want the date from
+		//
+		params = {
+			HostedZoneId: container.zone_id
+		};
+
+		//
+		//	2.	Request all the DSN records
+		//
+		container.route53.listResourceRecordSets(params, function(error, data) {
+
+			//
+			//	1.	Check if there was an error
+			//
+			if(error)
+			{
+				return reject(error);
+			}
+
+			//
+			//	2.	Save the result for the next chain
+			//
+			container.entries = data.ResourceRecordSets
+
+			//
+			//	-> Move to the next chain
+			//
+			return resolve(container);
+
+		});
+
+	});
+}
+
+//
+//	Loop over the DNS records and check if the record type that we want to
+//	already exists
+//
+function look_for_domain_entry(container)
+{
+	return new Promise(function(resolve, reject) {
+
+		term.clear();
+
+		term("\n");
+
+		term.yellow("\tLooking for domain entry...");
+
+		//
+		//	1.	Create a variable that will store the DNS entry
+		//
+		let dns_entry = null;
+
+		//
+		//	2.	Loop over all the Zones that we got to look for the
+		//		domain and grab the Zone ID
+		//
+		for(let key in container.entries)
+		{
+			//
+			//	1.	Check if the domain name entry matches our own
+			//
+			if(container.entries[key].Name == container.source + '.')
+			{
+				//
+				//	1.	Once the have the domain matching see if it has a
+				//		record of type A
+				//
+				if(container.entries[key].Type == 'A')
+				{
+					//
+					//	1.	Save the whole object since it is needed to
+					//		delete the entry, and this whole object is
+					//		used to match the delete action
+					//
+					dns_entry = container.entries[key]
+
+					//
+					//	->	Brake to preserve CPU cycles
+					//
+					break;
+				}
+			}
+		}
+
+		//
+		//	3.	Save the entry for the next entry
+		//
+		container.dns_entry = dns_entry;
+
+		//
+		//	-> Move to the next chain
+		//
+		return resolve(container);
+
+	});
+}
+
+//
+//	Make sure that if there is already a A entry in the domain setting we
+//	remove it before adding the new one.
+//
+function delete_domain_entry(container)
+{
+	return new Promise(function(resolve, reject) {
+
+		//
+		//	1. Check if a record was found
+		//
+		if(!container.dns_entry)
+		{
+			//
+			//	->	Move to the next step
+			//
+			return resolve(container);
+		}
+
+		term.clear();
+
+		term("\n");
+
+		term.yellow("\tDeleting duplicate entry...");
+
+		//
+		//	2.	Create the Delete action for Route 53
+		//
+		let params = {
+			ChangeBatch: {
+				Changes: [{
+					Action: "DELETE",
+					ResourceRecordSet: container.dns_entry
+				}]
+			},
+			HostedZoneId: container.zone_id
+		};
+
+		//
+		//	3.	Perform the action on Route 53
+		//
+		container.route53.changeResourceRecordSets(params, function(error, data) {
+
+			//
+			//	1.	Check if there was no error
+			//
+			if(error)
+			{
+				return reject(new Error(error.message));
+			}
+
+			//
+			//	2.	Wait few sec since the delete action is not instant, but
+			//		it is fast enough that constantly checking is overkill
+			//
+			setTimeout(function() {
+
+				//
+				//	->	Move to the next step
+				//
+				return resolve(container);
+
+			}, 3000)
+
+		});
+
+	});
+}
+
+//
+//	Create a DNS entry that will point the domain to the CloudFront
+//	Distribution. If the domain is not found in Route 53 we just display
+//	what needs to be set in the DNS
+//
+function create_a_route_53_record(container)
+{
+	return new Promise(function(resolve, reject) {
+
+		//
+		//	1.	Update a record only if we have the domain in ROute 53
+		//
+		if(!container.zone_id)
+		{
+			//
+			//	-> Move to the next chain
+			//
+			return resolve(container);
+		}
+
+		term.clear();
+
+		term("\n");
+
+		term.yellow("\tCreating a new Route 53 entry...");
+
+		//
+		//	2.	All the options to add a new record
+		//
+		let options = {
+			ChangeBatch: {
+				Changes: [{
+					Action: "CREATE",
+					ResourceRecordSet: {
+						AliasTarget: {
+							DNSName: container.cloudfront_domain_name,
+							EvaluateTargetHealth: false,
+							HostedZoneId: 'Z2FDTNDATAQYW2' // Fixed ID CloudFront distribution
+						},
+						Name: container.source,
+						Type: "A"
+					}
+				}],
+				Comment: "S3 Hosted Site"
+			},
+			HostedZoneId: container.zone_id
+		};
+
+		//
+		//	3.	Execute the change on Route 53
+		//
+		container.route53.changeResourceRecordSets(options, function(error, data) {
+
+			//
+			//	1.	Check if there was an error
+			//
+			if(error)
+			{
+				return reject(error);
+			}
+
+			//
+			//	-> Move to the next chain
+			//
+			return resolve(container);
+
+		});
+
+	});
+}
+
+//
+//	If we don't have the domain in Route 53 then we just print out
+//	what needs to be set in the domain to make sure all the traffic
+//	goes to CloudFront
+//
+function print_domain_configuration(container)
+{
+	return new Promise(function(resolve, reject) {
+
+		//
+		//	1.	Skip this step if we have the domain in Route 53 because
+		//		it means that we were able to automatically update
+		//		the record
+		//
+		if(container.zone_id)
+		{
+			//
+			//	-> Move to the next chain
+			//
+			return resolve(container);
+		}
+
+		term.clear();
+
+		term("\n");
+
+		term.brightWhite("\tPlease update your DNS record with the following...");
+
+		term("\n");
+
+		term.brightWhite("\tPoint your domain name " + container.domain + " to the following A record");
+
+		term("\n");
+
+		term.brightWhite("\t" + container.cloudfront_domain_name);
+
+		term("\n");
+		term("\n");
+
+		//
+		//	-> Move to the next chain
+		//
+		return resolve(container);
 
 	});
 }
