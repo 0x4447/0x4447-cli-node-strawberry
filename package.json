@@ -1,6 +1,6 @@
 {
   "name": "@0x4447/strawberry",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "🍓This CLI will create a SSL domain redirection using CloudFront and S3 automatically for you.",
   "homepage": "https://0x4447.com/toolbox",
   "main": "index.js",
