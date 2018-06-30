@@ -1,8 +1,69 @@
 # 🍓 Strawberry
 
-This CLI will create a SSL domain redirection using CloudFront and S3 automatically for you.
+This CLI will help you automatically create a HTTPS redirect from one domain to another. This seemingly simple task is actually quite complex when you want to have a domain be redirected over a encrypted connection. THe problem is that you need to create a new SLL certificate for the domain that you want to redirect from, and have it some how be accessible by the public. One solution would be to just have a server that would do that made with your favorite programming language, but that seams to be an overkill for such basic task.
 
-# WORK IN PROGRESS
+ANother solution would be to go serverless and take advantage of what AWS has to offer so you don't have to manage a server for a simple redirect.
+
+# How to Install
+
+```
+] sudo npm install -g @0x4447/strawberry
+```
+
+# How to Use
+
+```
+] strawberry -s test1.example.com -d test.example.com
+```
+
+# Where to get Help
+
+```
+] strawberry -h
+```
+
+# What to Expect
+
+This CLI will:
+
+- Create a S3 bucket with redirect enabled to the destination domain.
+- Create a certificate for the source domain.
+- Create a CloudFront distribution with the new certificate.
+- Configure Route 53 so the source domain points to CloudFront
+
+**WARNING**: What if the certificate takes too long to validate? After 60 seconds, the app will quit and print out a detailed explanation of what your next steps are. Take the time to thoroughly go over the printout, and you'll be good.
+
+This way the high level flow looks like this:
+
+- You visit the source domain.
+- CloudFront reads the S3 bucket configuration.
+- Redirects the user to the destination domain.
+
+All this using SSL.
+
+# Credentials
+
+To use this CLI, create a programmatic user or create a role with the following permissions:
+
+- AmazonS3FullAccess
+- CloudFrontFullAccess
+- AmazonRoute53FullAccess
+- AWSCertificateManagerFullAccess
+
+# Is Deployment Instant?
+
+No, it's not. The following aspects don't happen right away:
+
+- SSL Certificate confirmation
+- CloudFront distribution
+
+### SSL Certificate Confirmation
+
+The time frame for this process ranges from 10 seconds to 24 hours. It's completely unpredictable, and there's no way to speed up the process. Because of this, the app will quit if the certificate isn't confirmed within 60 seconds. When that happens, go to the AWS Console to monitor the certificate.
+
+### CloudFront Distribution
+
+This takes up to 15 or 20 minutes, but when you reach this point, you can be certain that the configuration is correct. At this point, you just need to wait until the process is complete. Only then will the domain deliver the website.
 
 # The End
 
