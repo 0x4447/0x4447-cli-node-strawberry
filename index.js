@@ -645,7 +645,7 @@ function convert_bucket_to_website(container)
 		//	1.	The options for S3
 		//
 		let params = {
-			Bucket: container.destination,
+			Bucket: container.source,
 			WebsiteConfiguration: {
 				RedirectAllRequestsTo: {
 					HostName: container.destination,
