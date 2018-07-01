@@ -2,7 +2,7 @@
 
 This CLI will automatically create a HTTPS redirect from one domain to another. This seemingly simple task is actually quite complex when you want to have a domain be redirected over a encrypted connection.
 
-The problem is that you need to create a new SLL certificate for the domain that you want to redirect from, and have it some how be accessible by the public. One solution would be to just have a regular server to do the redirect, but that seams to be an overkill for a such small task.
+The problem is that you need to create a new SSL certificate for the domain that you want to redirect from, and have it some how be accessible by the public. One solution would be to just have a regular server to do the redirect, but that seams to be an overkill for a such small task.
 
 Another solution would be to go serverless, and take advantage of what AWS has to offer so you don't have to manage a server for a simple redirect.
 
