@@ -1516,7 +1516,6 @@ function create_a_distribution(container)
 					CustomErrorResponses: {
 						Quantity: 0
 					},
-					DefaultRootObject: 'home',
 					HttpVersion: 'http2',
 					IsIPV6Enabled: true,
 					PriceClass: 'PriceClass_100',
