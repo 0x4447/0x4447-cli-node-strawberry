@@ -17,7 +17,7 @@ This is where 🍓 Strawberry will help you create the whole stack automatically
 # How to Use
 
 ```
-] strawberry -s test1.example.com -d test.example.com
+] strawberry -s source.example.com -d destination.example.com
 ```
 
 # Where to get Help
