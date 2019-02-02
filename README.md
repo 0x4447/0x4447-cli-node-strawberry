@@ -1,12 +1,14 @@
 # 🍓 Strawberry
 
-This CLI will automatically create a HTTPS redirect from one domain to another. This seemingly simple task is actually quite complex when you want to have a domain be redirected over a encrypted connection.
+This CLI was create out for frustration after strugelly countless time to do a simple HTTPS redirect, for example from: https://example.com to https://www.example.com.
 
-The problem is that you need to create a new SSL certificate for the domain that you want to redirect from, and have it some how be accessible by the public. One solution would be to just have a regular server to do the redirect, but that seams to be an overkill for a such small task.
+This is straight forward over a non encrypted connection, but to have this working over HTTPS it is a different story since you need a server, with a certificate that can establish a secure connection first, before it tells the browser to go somewhere else.
 
-Another solution would be to go serverless, and take advantage of what AWS has to offer so you don't have to manage a server for a simple redirect.
+Simple to do with a regular server, worse if you start working with server less technologies. Not to mention the certificate setup and management for such a simple task.
 
-This is where 🍓 Strawberry will help you create the whole stack automatically for you. You just provide some basic information, and the rest is up to the CLI.
+That's why Strawberry came to be. We actually use serverless technology to fight serverless technologies – go figure. By using AWS S3 and AWS CloudFormatio to handle this simple operation.
+
+Strawberry will create the whole stack automatically for you. You just provide some basic information, and the rest is up to the CLI.
 
 # How to Install
 
@@ -41,6 +43,7 @@ This is where 🍓 Strawberry will help you create the whole stack automatically
 
 - You visit the source domain.
 - CloudFront reads the S3 bucket configuration.
+- Establishes a secure connection.
 - Redirects the user to the destination domain.
 
 All this using SSL.
@@ -71,8 +74,8 @@ This takes up to 15 or 20 minutes, but when you reach this point, you can be cer
 
 # The End
 
-If you enjoyed this project, please consider giving it a 🌟. And check out our [0x4447 GitHub account](https://github.com/0x4447), where we have additional resources that you might find useful or interesting.
+If you enjoyed this project, please consider giving it a 🌟. And check out our [0x4447 GitHub account](https://github.com/0x4447), where you'll find additional resources you might find useful or interesting.
 
 ## Sponsor 🎊
 
-This project is brought to you by 0x4447 LLC, a software company specializing in build custom solutions on top of AWS. Find out more by following this link: https://0x4447.com or, say [hello@0x4447.email](mailto:hello@0x4447.email?Subject=Hello%20From%20Repo&Body=Hi%2C%0A%0AMy%20name%20is%20NAME%2C%20and%20I%27d%20like%20to%20get%20in%20touch%20with%20someone%20at%200x4447.%0A%0AI%27d%20like%20to%20discuss%20the%20following%20topics%3A%0A%0A-%20LIST_OF_TOPICS_TO_DISCUSS%0A%0ASome%20useful%20information%3A%0A%0A-%20My%20full%20name%20is%3A%20FIRST_NAME%20LAST_NAME%0A-%20My%20time%20zone%20is%3A%20TIME_ZONE%0A-%20My%20working%20hours%20are%20from%3A%20TIME%20till%20TIME%0A-%20My%20company%20name%20is%3A%20COMPANY%20NAME%0A-%20My%20company%20website%20is%3A%20https%3A%2F%2F%0A%0ABest%20regards.).
+This project is brought to you by 0x4447 LLC, a software company specializing in building custom solutions on top of AWS. Follow this link to learn more: https://0x4447.com. Alternatively, send an email to [hello@0x4447.email](mailto:hello@0x4447.email?Subject=Hello%20From%20Repo&Body=Hi%2C%0A%0AMy%20name%20is%20NAME%2C%20and%20I%27d%20like%20to%20get%20in%20touch%20with%20someone%20at%200x4447.%0A%0AI%27d%20like%20to%20discuss%20the%20following%20topics%3A%0A%0A-%20LIST_OF_TOPICS_TO_DISCUSS%0A%0ASome%20useful%20information%3A%0A%0A-%20My%20full%20name%20is%3A%20FIRST_NAME%20LAST_NAME%0A-%20My%20time%20zone%20is%3A%20TIME_ZONE%0A-%20My%20working%20hours%20are%20from%3A%20TIME%20till%20TIME%0A-%20My%20company%20name%20is%3A%20COMPANY%20NAME%0A-%20My%20company%20website%20is%3A%20https%3A%2F%2F%0A%0ABest%20regards.).
