@@ -1,52 +1,52 @@
 # 🍓 Strawberry
 
-This CLI was create out for frustration after strugelly countless time to do a simple HTTPS redirect, for example from: https://example.com to https://www.example.com.
+This CLI was create out of frustration after we struggled countless times to do a simple HTTPS redirect, for example from: https://example.com to https://www.example.com.
 
-This is straight forward over a non encrypted connection, but to have this working over HTTPS it is a different story since you need a server, with a certificate that can establish a secure connection first, before it tells the browser to go somewhere else.
+This is a straightforward action over a non-encrypted connection. However, trying to make it work over HTTPS is an entirely different story, since you need a server with a certificate that can establish a secure connection before it tells the browser to go somewhere else.
 
-Simple to do with a regular server, worse if you start working with server less technologies. Not to mention the certificate setup and management for such a simple task.
+It's simple to do this with a regular server, but more complicated if working with serverless technologies, not to mention the certificate setup and management for such a simple task.
 
-That's why Strawberry came to be. We actually use serverless technology to fight serverless technologies – go figure. By using AWS S3 and AWS CloudFormatio to handle this simple operation.
+That's how Strawberry came to be. We actually use serverless technology to fight serverless technologies through the use of AWS S3 and AWS CloudFormation to handle this simple operation. Go figure...
 
-Strawberry will create the whole stack automatically for you. You just provide some basic information, and the rest is up to the CLI.
+Strawberry automatically creates the entire stack for you. All you have to do is provide some basic information, and leave the rest up to the CLI.
 
-# How to Install
+# How to install
 
 ```
 ] sudo npm install -g @0x4447/strawberry
 ```
 
-# How to Use
+# How to use
 
 ```
 ] strawberry -s source.example.com -d destination.example.com
 ```
 
-# Where to get Help
+# Where to get help
 
 ```
 ] strawberry -h
 ```
 
-# What to Expect
+# What to expect
 
-### This CLI will
+### This CLI...
 
-- Create a S3 bucket with redirect enabled to the destination domain.
-- Create a certificate for the source domain.
-- Create a CloudFront distribution with the new certificate.
-- Configure Route 53 so the source domain points to CloudFront
+- Creates an S3 bucket with redirect enabled to the destination domain
+- Creates a certificate for the source domain
+- Creates a CloudFront distribution with the new certificate
+- Configures Route 53 so the source domain points to CloudFront
 
-**WARNING**: What if the certificate takes too long to validate? After 60 seconds, the app will quit and print out a detailed explanation of what your next steps are. Take the time to thoroughly go over the printout, and you'll be good.
+**WARNING**: What if the certificate takes too long to validate? After 60 seconds, the app quits and prints out a detailed explanation of what your next steps should be. Take the time to thoroughly go over the printout, and you'll be good.
 
-### High level flow looks like this
+### High-level flow looks like this:
 
-- You visit the source domain.
-- CloudFront reads the S3 bucket configuration.
-- Establishes a secure connection.
-- Redirects the user to the destination domain.
+- Visit the source domain
+- CloudFront reads the S3 bucket configuration
+- A secure connection is established
+- The user is redirected to the destination domain
 
-All this using SSL.
+All of this is done through the use of SSL.
 
 # Credentials
 
@@ -57,24 +57,24 @@ To use this CLI, create a programmatic user or create a role with the following 
 - AmazonRoute53FullAccess
 - AWSCertificateManagerFullAccess
 
-# Is Deployment Instant?
+# Is deployment instant?
 
 No, it's not. The following aspects don't happen right away:
 
 - SSL Certificate confirmation
 - CloudFront distribution
 
-### SSL Certificate Confirmation
+### SSL Certificate confirmation
 
-The time frame for this process ranges from 10 seconds to 24 hours. It's completely unpredictable, and there's no way to speed up the process. Because of this, the app will quit if the certificate isn't confirmed within 60 seconds. When that happens, go to the AWS Console to monitor the certificate.
+The timeframe for this process ranges from 10 seconds to 24 hours. It's completely unpredictable, and there's no way to speed up the process. Because of this, the app quits if the certificate isn't confirmed within 60 seconds. When that happens, go to the AWS Console to monitor the certificate.
 
-### CloudFront Distribution
+### CloudFront distribution
 
 This takes up to 15 or 20 minutes, but when you reach this point, you can be certain that the configuration is correct. At this point, you just need to wait until the process is complete. Only then will the domain deliver the website.
 
-# The End
+# The end
 
-If you enjoyed this project, please consider giving it a 🌟. And check out our [0x4447 GitHub account](https://github.com/0x4447), where you'll find additional resources you might find useful or interesting.
+If you enjoyed this project, please consider giving it a 🌟. And check out our [0x4447 GitHub account](https://github.com/0x4447), which contains additional resources you might find useful or interesting.
 
 ## Sponsor 🎊
 
