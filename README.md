@@ -2,7 +2,7 @@
 
 This CLI was create out of frustration after we struggled countless times to do a simple HTTPS redirect, for example from: https://example.com to https://www.example.com.
 
-This is a straightforward action over a non-encrypted connection. However, trying to make it work over HTTPS is an entirely different story, since you need a server with a certificate that can establish a secure connection before it tells the browser to go somewhere else.
+This is a straightforward action over a non-encrypted connection. However, trying to make it work over HTTPS is an entirely different story, since you need a server with a certificate that can establish a secure connection before the server can tells the browser where to go.
 
 It's simple to do this with a regular server, but more complicated if working with serverless technologies, not to mention the certificate setup and management for such a simple task.
 
@@ -41,9 +41,9 @@ Strawberry automatically creates the entire stack for you. All you have to do is
 
 ### High-level flow looks like this:
 
-- Visit the source domain
-- CloudFront reads the S3 bucket configuration
+- User visit the source domain
 - A secure connection is established
+- CloudFront reads the S3 bucket configuration
 - The user is redirected to the destination domain
 
 All of this is done through the use of SSL.
